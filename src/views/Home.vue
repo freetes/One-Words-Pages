@@ -9,7 +9,7 @@
 // @ is an alias to /src
 import axios from 'axios'
 
-const BASE_URL = 'https://api.grayclass.site/api'
+const BASE_URL = 'https://api.grayclass.site:2333/api'
 
 export default {
   name: 'home',
@@ -21,7 +21,10 @@ export default {
   methods: {
     findGroup: async function (){
       let result = await axios.post(BASE_URL + '/searchGroupByCode', {code: this.code})
-      console.log(result)
+
+      if(result.data.data.length > 0){
+        this.$router.push('/onewords/' + result.data.data[0]._id)
+      }
     }
   },
 }
