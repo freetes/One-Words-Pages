@@ -106,7 +106,6 @@ export default {
   align-items: center;
 
   >.inputs{
-    width: 300px;
     height: 100px;
     display: flex;
     flex-direction: row;
