@@ -7,5 +7,5 @@ const server = http.createServer((request, response) => {
   });
 })
 
-server.listen(3500, () => {
+server.listen(80, () => {
 });
