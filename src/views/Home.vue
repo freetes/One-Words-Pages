@@ -1,18 +1,28 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <input type="text" name="" v-model="code" id="">
+    <button @click="findGroup">搜索</button>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import axios from 'axios'
+
+const BASE_URL = 'https://api.grayclass.site/api'
 
 export default {
   name: 'home',
-  components: {
-    HelloWorld
-  }
+  data: ()=>{
+    return {
+      code: ''
+    }
+  },
+  methods: {
+    findGroup: async function (){
+      let result = await axios.post(BASE_URL + '/searchGroupByCode', {code: this.code})
+      console.log(result)
+    }
+  },
 }
 </script>
