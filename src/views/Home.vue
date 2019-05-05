@@ -16,7 +16,14 @@
       </div>
     </div>
 
-    <p class="words" v-if="!!groupId">请打开小程序端，我的班级 -> 交互 -> 「发送弹幕」</p>
+    <div class="words" v-if="!!groupId">
+      <p>持续接受弹幕中{{ ['', '.', '..', '...'][count%4] }}</p>
+    </div>
+
+    <div class="words" v-if="!!groupId && oneWords.length == 0">
+      <p>请打开小程序端</p>
+      <p>我的班级 - 互动 - 「发送弹幕」</p>
+    </div>
 
   </div>
 </template>
@@ -37,6 +44,7 @@ export default {
       message: '请输入群组ID',
       groupId: '',
       oneWords: [],
+      count: 0,
       groupInfo: {}
     }
   },
@@ -51,12 +59,12 @@ export default {
 
         this.oneWords = []
 
-        let time = Date.now() - 2000, count = 0
+        let time = Date.now() - 1000, count = 0
 
         setInterval(() => {
-          count ++
+          this.count = count ++ 
           console.log(`第 ${count}次 获取`)
-          time = Date.now() - 2000
+          time = Date.now() - 1000
 
           axios.post(BASE_URL + '/getOneWordsByGroupId', {groupId: this.groupId, time: moment(time).toISOString()})
           .then(res=>{
@@ -66,7 +74,7 @@ export default {
 
             this.oneWords = this.oneWords.concat(res.data.data)
           })
-        }, 2000);
+        }, 1000);
       }
       else{
         this.code = ''
@@ -76,7 +84,7 @@ export default {
       
         setTimeout(()=>{
           this.message = '请输入群组ID'
-        }, 2000)
+        }, 1000)
       }
     }
   },
@@ -154,10 +162,31 @@ export default {
   }
 
   >.onewords{
-    padding: 20px 0;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 20px;
+
+    >.oneword{
+      margin-top: 20px;
+      padding: 10px 25px;
+      border-radius: 20px;
+      text-align: left;
+      line-height: 20px;
+      font-size: 18px;
+      border: 1px solid lightgray;
+      box-shadow: 3px 10px 10px lightgray;
+    }
   }
   >.words{
     padding: 20px 0;
+
+    >p{
+      padding: 10px 0;
+    }
   }
 }
 
