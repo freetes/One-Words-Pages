@@ -98,6 +98,10 @@ export default {
 }
 
 .home {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #ededed;
   width: 100%;
   height: 100%;
   display: flex;
@@ -106,6 +110,7 @@ export default {
   align-items: center;
 
   >.inputs{
+    flex: 0 0 auto;
     height: 100px;
     display: flex;
     flex-direction: row;
@@ -141,6 +146,7 @@ export default {
   }
 
   >.group-info{
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;    
@@ -161,8 +167,10 @@ export default {
   }
 
   >.onewords{
+    
     width: 90%;
     max-width: 600px;
+    flex: 1 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -170,17 +178,19 @@ export default {
     padding: 20px;
 
     >.oneword{
-      margin-top: 20px;
-      padding: 10px 25px;
+      margin-top: 15px;
+      padding: 10px 20px;
       border-radius: 20px;
       text-align: left;
       line-height: 20px;
-      font-size: 18px;
-      border: 1px solid lightgray;
+      font-size: 16px;
+      background-color: white;
+      border: 1px solid white;
       box-shadow: 3px 10px 10px lightgray;
     }
   }
   >.words{
+    flex: 0 0 auto;
     padding: 20px 0;
 
     >p{
