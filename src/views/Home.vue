@@ -71,7 +71,7 @@ export default {
               setTimeout(()=>{
                 for(let j = 0; j < this.oneWords.length; j++){
                   if(id == this.oneWords[j]._id){
-                    this.oneWords[i].hidden = true
+                    this.oneWords[j].hidden = true
                     break
                   }
                 }
