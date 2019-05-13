@@ -1,30 +1,25 @@
 <template>
   <div class="home" :class="{'top': !!groupId}">
-    <div class="inputs">
+    <div class="inputs" v-if="!groupId">
       <input type="number" v-model="code" :placeholder="message" />
       <button @click="findGroup">搜索</button>
     </div>
 
-    <div class="group-info">
+    <div class="group-info" v-else>
+      <img :src="groupInfo.filePath" alt="">
       <p class="name">{{ groupInfo.name }}</p>
-      <p class="description">{{ groupInfo.description }}</p>
     </div>
 
-    <div v-if="oneWords.length > 0" class="onewords">
+    <div class="onewords" v-if="groupId" :style="{'max-height': oneWordsContainerHeight + 'px'}">
       <div class="oneword" v-for="item in oneWords" :key="item._id">
-        <p>{{ item.content }}</p>
+        <img v-show="!item.hidden" :src="item.creater.wxInfo.avatarUrl" alt="">
+        <p v-show="!item.hidden">{{ item.content }}</p>
       </div>
     </div>
 
-    <div class="words" v-if="!!groupId">
-      <p>持续接受弹幕中{{ ['', '.', '..', '...'][count%4] }}</p>
+    <div class="words" v-if="groupId">
+      <p>{{ oneWords.length==0?'请打开小程序端，我的群组 - 互动 - 「发送弹幕」':'持续接受弹幕中...' }}</p>
     </div>
-
-    <div class="words" v-if="!!groupId && oneWords.length == 0">
-      <p>请打开小程序端</p>
-      <p>我的班级 - 互动 - 「发送弹幕」</p>
-    </div>
-
   </div>
 </template>
 
@@ -44,8 +39,9 @@ export default {
       message: '请输入群组ID',
       groupId: '',
       oneWords: [],
+      groupInfo: {},
       count: 0,
-      groupInfo: {}
+      oneWordsContainerHeight: 0
     }
   },
 
@@ -53,26 +49,36 @@ export default {
     findGroup: async function (){
       let result = await axios.post(BASE_URL + '/searchGroupByCode', {code: this.code})
 
-      if(result.data.data.length > 0){
+      if(result.data.data.length > 0 && result.data.data[0].status!=-2){
         this.groupId = result.data.data[0]._id
+        result.data.data[0].filePath = 'https://api.grayclass.site:2333' + result.data.data[0].filePath
         this.groupInfo = result.data.data[0]
 
         this.oneWords = []
 
-        let time = Date.now() - 1000, count = 0
+        let count = 0
 
         setInterval(() => {
-          this.count = count ++ 
-          console.log(`第 ${count}次 获取`)
-          time = Date.now() - 1000
-
-          axios.post(BASE_URL + '/getOneWordsByGroupId', {groupId: this.groupId, time: moment(time).toISOString()})
+          axios.post(BASE_URL + '/getOneWordsByGroupId', {groupId: this.groupId, count})
           .then(res=>{
-            for(let item of res.data.data){
-              item.createAt = moment(item.create_at).fromNow()
+            count = res.data.data.oneWords.length + res.data.data.amount
+
+            for(let i = 0, length = this.oneWords.length; i < res.data.data.oneWords.length; i++){
+              let id = res.data.data.oneWords[i]._id
+              res.data.data.oneWords[i].createAt = moment(res.data.data.oneWords[i].create_at).fromNow()
+
+              // 卸载弹幕
+              setTimeout((id)=>{
+                for(let i = 0; i < this.oneWords.length; i++){
+                  if(id = this.oneWords[i]._id){
+                    this.oneWords[i].hidden = true
+                    break
+                  }
+                }
+              }, 15000)
             }
 
-            this.oneWords = this.oneWords.concat(res.data.data)
+            this.oneWords = this.oneWords.concat(res.data.data.oneWords)
           })
         }, 1000);
       }
@@ -88,6 +94,12 @@ export default {
       }
     }
   },
+
+  created: function(){
+    var h = document.documentElement.clientHeight || document.body.clientHeight;
+    let oneWordsContainerHeight = h - 100 - 50
+    this.oneWordsContainerHeight = oneWordsContainerHeight
+  }
 }
 </script>
 
@@ -104,6 +116,7 @@ export default {
   background-color: #ededed;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -146,18 +159,25 @@ export default {
   }
 
   >.group-info{
+    width: 100%;
+    height: 100px;
     flex: 0 0 auto;
     display: flex;
-    flex-direction: column;
-    justify-content: center;    
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    border-bottom: 1px solid gray;
+    background-color: white;
 
+    >img{
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
     >.name{
-      font-size: 26px;
+      font-size: 28px;
       color: black;
       font-weight: bold;
-      padding: 30px 0;
     }
     >.description{
       font-size: 16px;
@@ -167,34 +187,63 @@ export default {
   }
 
   >.onewords{
-    
-    width: 90%;
-    max-width: 600px;
+    width: 100%;
     flex: 1 0 auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 20px;
+    flex-wrap: wrap;
+    padding: 20px 0;
 
     >.oneword{
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
       margin-top: 15px;
-      padding: 10px 20px;
-      border-radius: 20px;
-      text-align: left;
-      line-height: 20px;
-      font-size: 16px;
-      background-color: white;
-      border: 1px solid white;
-      box-shadow: 3px 10px 10px lightgray;
+      animation: showIn 15s linear;
+      margin-left: -100%;
+
+      @keyframes showIn {
+        from {
+          margin-left: 100%;
+        }
+        to {
+          margin-left: -100%;
+        }
+      }
+
+      >img{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 5px;
+        box-shadow: 3px 10px 10px lightgray;
+      }
+      >p{
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-align: left;
+        line-height: 20px;
+        font-size: 16px;
+        background-color: white;
+        border: 1px solid white;
+        box-shadow: 3px 10px 10px lightgray;
+        display: block;
+        word-break: keep-all;
+        white-space: nowrap;
+      }
     }
   }
   >.words{
     flex: 0 0 auto;
-    padding: 20px 0;
+    padding: 10px 0;
 
     >p{
-      padding: 10px 0;
+      font-size: 18px;
+      line-height: 30px;
     }
   }
 }
