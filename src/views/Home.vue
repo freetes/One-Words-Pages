@@ -68,9 +68,9 @@ export default {
               res.data.data.oneWords[i].createAt = moment(res.data.data.oneWords[i].create_at).fromNow()
 
               // 卸载弹幕
-              setTimeout((id)=>{
-                for(let i = 0; i < this.oneWords.length; i++){
-                  if(id = this.oneWords[i]._id){
+              setTimeout(()=>{
+                for(let j = 0; j < this.oneWords.length; j++){
+                  if(id == this.oneWords[j]._id){
                     this.oneWords[i].hidden = true
                     break
                   }
@@ -204,14 +204,14 @@ export default {
       align-items: center;
       margin-top: 15px;
       animation: showIn 15s linear;
-      margin-left: -100%;
+      margin-left: -50%;
 
       @keyframes showIn {
         from {
           margin-left: 100%;
         }
         to {
-          margin-left: -100%;
+          margin-left: -50%;
         }
       }
 
@@ -227,13 +227,14 @@ export default {
         border-radius: 20px;
         text-align: left;
         line-height: 20px;
-        font-size: 16px;
+        font-size: 18px;
         background-color: white;
         border: 1px solid white;
         box-shadow: 3px 10px 10px lightgray;
         display: block;
         word-break: keep-all;
         white-space: nowrap;
+        font-weight: bold;
       }
     }
   }
